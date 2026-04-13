@@ -50,7 +50,7 @@ pipeline {
           rm -rf gitops
           git clone https://${GIT_USER}:${GIT_PASS}@github.com/bobieaditya31/k8s-lab-infra.git gitops
 
-          cd gitops/apps/myapp
+          cd gitops/applications/myapp
 
           # update tag
           sed -i "s/tag:.*/tag: ${TAG}/" values.yaml
