@@ -1,7 +1,7 @@
 # =========================
 # STAGE 1: dependencies
 # =========================
-FROM node:24-alpine AS deps
+FROM node:20.11-alpine AS deps
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ RUN npm ci --only=production
 # =========================
 # STAGE 2: build
 # =========================
-FROM node:24-alpine AS builder
+FROM node:20.11-alpine AS builder
 
 WORKDIR /app
 
