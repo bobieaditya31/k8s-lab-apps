@@ -3,12 +3,7 @@ pipeline {
 
   environment {
     IMAGE_NAME = "bobieaditya03/myapp"
-    DOCKER_CREDS = "dockerhub"
-  }
-
-  options {
-    timestamps()
-    buildDiscarder(logRotator(numToKeepStr: '10'))
+    DOCKER_CREDS = "dockerhub-credentials"
   }
 
   stages {
@@ -19,22 +14,10 @@ pipeline {
       }
     }
 
-    stage('Read Version') {
-      steps {
-        script {
-          VERSION = readFile('VERSION').trim()
-          BUILD_TAG = "${VERSION}.${BUILD_NUMBER}"
-        }
-      }
-    }
-
     stage('Build Image') {
       steps {
         script {
-          docker.build(
-            "${IMAGE_NAME}:${BUILD_TAG}",
-            "--build-arg VERSION=${BUILD_TAG} ."
-          )
+          docker.build("${IMAGE_NAME}:v${BUILD_NUMBER}", ".")
         }
       }
     }
@@ -43,27 +26,18 @@ pipeline {
       steps {
         script {
           docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDS) {
-            def img = docker.image("${IMAGE_NAME}:${BUILD_TAG}")
+            def img = docker.image("${IMAGE_NAME}:v${BUILD_NUMBER}")
             img.push()
             img.push("latest")
           }
         }
       }
     }
-
-    stage('Verify Image') {
-      steps {
-        sh "docker pull ${IMAGE_NAME}:${BUILD_TAG}"
-      }
-    }
   }
 
   post {
     success {
-      echo "✅ Image pushed: ${BUILD_TAG}"
-    }
-    failure {
-      echo "❌ Pipeline gagal"
+      echo "✅ Image pushed: v${BUILD_NUMBER}"
     }
   }
 }
