@@ -16,19 +16,23 @@ pipeline {
 
     stage('Build Image') {
       steps {
-        script {
-          docker.build("${IMAGE_NAME}:v${BUILD_NUMBER}", ".")
+        dir('demo-apps01') {
+          script {
+            docker.build("${IMAGE_NAME}:v${BUILD_NUMBER}", ".")
+          }
         }
       }
     }
 
     stage('Push Image') {
       steps {
-        script {
-          docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDS) {
-            def img = docker.image("${IMAGE_NAME}:v${BUILD_NUMBER}")
-            img.push()
-            img.push("latest")
+        dir('demo-apps01') {
+          script {
+            docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDS) {
+              def img = docker.image("${IMAGE_NAME}:v${BUILD_NUMBER}")
+              img.push()
+              img.push("latest")
+            }
           }
         }
       }
@@ -38,6 +42,9 @@ pipeline {
   post {
     success {
       echo "✅ Image pushed: v${BUILD_NUMBER}"
+    }
+    failure {
+      echo "❌ Pipeline gagal"
     }
   }
 }
