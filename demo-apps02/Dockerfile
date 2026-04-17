@@ -5,11 +5,12 @@ FROM node:18-alpine AS builder
 
 WORKDIR /build
 
-# Copy package files
-COPY app/package*.json ./
+# Copy package.json
+COPY app/package.json ./
 
-# Install production dependencies only
-RUN npm ci --only=production && \
+# ⭐ Generate package-lock.json otomatis, lalu install
+RUN npm install --package-lock-only && \
+    npm ci --omit=dev && \
     npm cache clean --force
 
 # ==========================================
