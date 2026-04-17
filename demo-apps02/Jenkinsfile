@@ -1,0 +1,104 @@
+pipeline {
+  agent any
+
+  environment {
+    // PARAMETER UNIK untuk demo-apps02
+    APP_NAME = "demo-apps02"
+    IMAGE = "bobieaditya03/restaurant-frontend"
+    TAG = "v${BUILD_NUMBER}"
+    GITOPS_REPO = "https://github.com/bobieaditya31/k8s-lab-infra.git"
+    
+    APP_DIR = "demo-apps02/app"           //Path ke folder app
+    GITOPS_PATH = "applications/demo-apps02"
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+    timeout(time: 30, unit: 'MINUTES')
+    disableConcurrentBuilds()
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Build Image') {
+      steps {
+        dir("${APP_DIR}") {                 // Masuk ke demo-apps02/app
+          sh "npm install"                  // Install dependencies dulu
+          sh "docker build -t ${IMAGE}:${TAG} -f ../Dockerfile ."  // Build dari parent folder
+          sh "docker tag ${IMAGE}:${TAG} ${IMAGE}:latest"
+        }
+      }
+    }
+
+    stage('Push Image') {
+      steps {
+        withCredentials([usernamePassword(
+          credentialsId: 'dockerhub-credentials',
+          usernameVariable: 'USER',
+          passwordVariable: 'PASS'
+        )]) {
+          sh """
+          echo $PASS | docker login -u $USER --password-stdin
+          docker push ${IMAGE}:${TAG}
+          docker push ${IMAGE}:latest
+          """
+        }
+      }
+    }
+
+    stage('Update GitOps Repo') {
+      steps {
+        withCredentials([usernamePassword(
+          credentialsId: 'github-credentials',
+          usernameVariable: 'GIT_USER',
+          passwordVariable: 'GIT_PASS'
+        )]) {
+
+          sh """
+          rm -rf gitops
+          git clone https://${GIT_USER}:${GIT_PASS}@github.com/bobieaditya31/k8s-lab-infra.git gitops
+
+          cd gitops/${GITOPS_PATH}
+
+          // Update tag
+          sed -i 's/tag:.*/tag: "${TAG}"/' values.yaml
+          sed -i 's|repository:.*|repository: ${IMAGE}|' values.yaml
+
+          git config user.email "jenkins@local"
+          git config user.name "jenkins"
+
+          git add .
+          git commit -m "🍽️ ${APP_NAME}: update restaurant app to ${TAG}" || echo "no changes"
+          git push
+          """
+        }
+      }
+    }
+
+    stage('Cleanup Build') {
+      steps {
+        sh """
+        echo "Cleaning up local Docker images..."
+        docker rm \$(docker ps -aq -f ancestor=${IMAGE}:${TAG}) 2>/dev/null || true
+        docker rmi ${IMAGE}:${TAG} 2>/dev/null || true
+        docker system prune -f
+        """
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "✅ ${APP_NAME}: Restaurant app deployed! Image: ${IMAGE}:${TAG}"
+    }
+    failure {
+      echo "❌ ${APP_NAME}: Build failed"
+    }
+  }
+}

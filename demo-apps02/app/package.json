@@ -1,0 +1,14 @@
+{
+  "name": "restaurant-frontend",
+  "version": "1.0.0",
+  "description": "Restaurant Menu Frontend App",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node src/app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "path": "^0.12.7"
+  }
+}
