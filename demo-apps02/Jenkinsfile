@@ -29,7 +29,6 @@ pipeline {
     stage('Build Image') {
       steps {
         dir("${APP_DIR}") {                 // Masuk ke demo-apps02/app
-          sh "npm install"                  // Install dependencies dulu
           sh "docker build -t ${IMAGE}:${TAG} -f ../Dockerfile ."  // Build dari parent folder
           sh "docker tag ${IMAGE}:${TAG} ${IMAGE}:latest"
         }
