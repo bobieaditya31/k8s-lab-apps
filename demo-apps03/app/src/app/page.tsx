@@ -78,7 +78,7 @@ export default function BocilCoffeShop() {
             <div className="flex items-center gap-2">
               <Coffee className="h-8 w-8 text-amber-600" />
               <span className="text-xl font-bold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
-                Enthree Coffee
+                Bocil Coffee
               </span>
             </div>
 
@@ -344,7 +344,7 @@ export default function BocilCoffeShop() {
               </span>
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Intip suasana Enthree Coffee melalui foto-foto berikut
+              Intip suasana Bocil Coffee melalui foto-foto berikut
             </p>
           </div>
 
@@ -380,7 +380,7 @@ export default function BocilCoffeShop() {
               </span>
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Kami menantikan kedatangan Anda di Enthree Coffee
+              Kami menantikan kedatangan Anda di Bocil Coffee
             </p>
           </div>
 
@@ -438,7 +438,7 @@ export default function BocilCoffeShop() {
                   className="flex-1 gap-2 border-amber-600 text-amber-700 hover:bg-amber-50"
                 >
                   <Facebook className="h-5 w-5" />
-                  Enthree Coffee
+                  Bocil Coffee
                 </Button>
               </div>
             </div>
@@ -521,7 +521,7 @@ export default function BocilCoffeShop() {
               <div className="flex items-center gap-2 mb-4">
                 <Coffee className="h-8 w-8 text-amber-500" />
                 <span className="text-2xl font-bold text-white">
-                  Enthree Coffee
+                  Bocil Coffee
                 </span>
               </div>
               <p className="text-gray-400 mb-4">
@@ -572,7 +572,7 @@ export default function BocilCoffeShop() {
           </div>
 
           <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} Enthree Coffee & Kitchen. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Bocil Coffee & Kitchen. All rights reserved.</p>
           </div>
         </div>
       </footer>
