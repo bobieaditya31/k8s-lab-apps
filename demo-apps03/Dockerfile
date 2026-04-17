@@ -5,17 +5,17 @@ FROM oven/bun:1-alpine AS builder
 
 WORKDIR /build
 
-# Copy semua file project
-COPY package.json bun.lock ./
-COPY next.config.ts tsconfig.json tailwind.config.ts postcss.config.mjs components.json ./
-COPY src ./src
-COPY public ./public
+# ⭐ COPY dari app/ folder
+COPY app/package.json app/bun.lock ./
 
-# Jika pakai Prisma
-# COPY prisma ./prisma
-
-# Install & build
+# Install dependencies
 RUN bun install --frozen-lockfile
+
+# ⭐ COPY semua dari app/
+COPY app/ ./
+
+# Build Next.js
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN bun run build
 
 # ==========================================
