@@ -27,7 +27,7 @@ pipeline {
     // Build langsung dari current directory (demo-apps02/)
     stage('Build Image') {
       steps {
-        // Tidak perlu dir()! Jenkinsfile sudah di demo-apps02/
+       dir("${APP_NAME}") { 
         sh "docker build -t ${IMAGE}:${TAG} -f Dockerfile ."
         sh "docker tag ${IMAGE}:${TAG} ${IMAGE}:latest"
       }
