@@ -24,11 +24,10 @@ pipeline {
       }
     }
 
-    // Build langsung dari current directory (demo-apps02/)
     stage('Build Image') {
       steps {
        dir("${APP_NAME}") { 
-        sh "docker build -t ${IMAGE}:${TAG} -f Dockerfile ."
+        sh "docker build --no-cache -t ${IMAGE}:${TAG} -f Dockerfile ."
         sh "docker tag ${IMAGE}:${TAG} ${IMAGE}:latest"
         }
       }
