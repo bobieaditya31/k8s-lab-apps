@@ -4,7 +4,6 @@ pipeline {
   environment {
     IMAGE = "bobieaditya03/myapp"
     TAG = "v${BUILD_NUMBER}"
-    GITOPS_REPO = "https://github.com/bobieaditya31/k8s-lab-infra.git"
   }
 
   stages {
@@ -48,7 +47,7 @@ pipeline {
 
           sh """
           rm -rf gitops
-          git clone https://${GIT_USER}:${GIT_PASS}@github.com/bobieaditya31/k8s-lab-infra.git gitops
+          git clone https://${GIT_USER}:${GIT_PASS}@github.com//bobieaditya31/k8s-lab-infra.git gitops
 
           cd gitops/applications/myapp
 
@@ -64,10 +63,11 @@ pipeline {
           """
         }
       }
-    }
+  }
+
   stage('Cleanup Build') {
     steps {
-    sh '''
+      sh '''
       # Hapus container sisa build
       docker rm $(docker ps -aq -f ancestor=${IMAGE}:${TAG}) 2>/dev/null || true
       
@@ -75,8 +75,8 @@ pipeline {
       docker rmi ${IMAGE}:${TAG} 2>/dev/null || true
       
       # Prune dangling
-      docker system prune -f
-    '''
+    docker system prune -f
+      '''
     }
   }
   
