@@ -65,8 +65,21 @@ pipeline {
         }
       }
     }
+  stage('Cleanup Build') {
+    steps {
+    sh '''
+      # Hapus container sisa build
+      docker rm $(docker ps -aq -f ancestor=${IMAGE}:${TAG}) 2>/dev/null || true
+      
+      # Hapus image lokal (sudah di-push)
+      docker rmi ${IMAGE}:${TAG} 2>/dev/null || true
+      
+      # Prune dangling
+      docker system prune -f
+    '''
+    }
   }
-
+  
   post {
     success {
       echo "✅ CI/CD SUCCESS"
