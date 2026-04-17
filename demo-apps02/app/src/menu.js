@@ -8,9 +8,9 @@ const menu = {
       id: 1,
       name: "Appetizers",
       items: [
-        { id: 101, name: "Spring Rolls", price: 8.99, description: "Crispy vegetable rolls with sweet chili sauce" },
-        { id: 102, name: "Bruschetta", price: 9.99, description: "Grilled bread with tomato, basil, and garlic" },
-        { id: 103, name: "Chicken Wings", price: 12.99, description: "Spicy buffalo wings with blue cheese dip" }
+        { id: 101, name: "Ayam Geprek", price: 20.000, description: "Spicy fried chicken with sambal" },
+        { id: 102, name: "Karedok", price: 15.000, description: "Fresh vegetables with peanut sauce" },
+        { id: 103, name: "Sempol Ayam", price: 12.000, description: "Spicy chicken balls with sambal" }
       ]
     },
     {
