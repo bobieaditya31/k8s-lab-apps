@@ -44,10 +44,9 @@ pipeline {
           usernameVariable: 'GIT_USER',
           passwordVariable: 'GIT_PASS'
         )]) {
-
           sh """
           rm -rf gitops
-          git clone https://${GIT_USER}:${GIT_PASS}@github.com//bobieaditya31/k8s-lab-infra.git gitops
+          git clone https://${GIT_USER}:${GIT_PASS}@github.com/bobieaditya31/k8s-lab-infra.git gitops
 
           cd gitops/applications/myapp
 
@@ -63,20 +62,21 @@ pipeline {
           """
         }
       }
-  }
+    }  
 
-  stage('Cleanup Build') {
-    steps {
-      sh '''
-      # Hapus container sisa build
-      docker rm $(docker ps -aq -f ancestor=${IMAGE}:${TAG}) 2>/dev/null || true
-      
-      # Hapus image lokal (sudah di-push)
-      docker rmi ${IMAGE}:${TAG} 2>/dev/null || true
-      
-      # Prune dangling
-    docker system prune -f
-      '''
+    stage('Cleanup Build') {
+      steps {
+        sh """
+        # Hapus container sisa build
+        docker rm \$(docker ps -aq -f ancestor=${IMAGE}:${TAG}) 2>/dev/null || true
+        
+        # Hapus image lokal (sudah di-push)
+        docker rmi ${IMAGE}:${TAG} 2>/dev/null || true
+        
+        # Prune dangling
+        docker system prune -f
+        """
+      }
     }
   }
   
