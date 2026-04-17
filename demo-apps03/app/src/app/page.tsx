@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Coffee, MapPin, Clock, Phone, Instagram, Facebook, Menu, X } from 'lucide-react';
 
-export default function EnthreeCoffeePage() {
+export default function BocilCoffeShop() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
 
