@@ -1,18 +1,11 @@
-# -------------------------------------------------
-# Dockerfile – static site dengan Nginx (alpine)
-# -------------------------------------------------
 FROM nginx:alpine
 
-# Hapus konfigurasi default (opsional)
-RUN rm /etc/nginx/conf.d/default.conf
-
-# Salin konfigurasi Nginx minimal (optional – jika Anda ingin men‑custom)
-# COPY nginx.conf /etc/nginx/conf.d/
-
-# Salin semua berkas static ke folder yang dilayani Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY app/ /usr/share/nginx/html/
 
-# Expose port 80 (default di Nginx)
-EXPOSE 80
+EXPOSE 3000
 
-# Nginx sudah dijalankan secara default via CMD
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["nginx", "-g", "daemon off;"]
