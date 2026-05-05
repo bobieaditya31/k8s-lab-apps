@@ -7,7 +7,6 @@ pipeline {
         TAG = "${GIT_COMMIT.take(7)}"
         GITOPS_REPO = "https://github.com/bobieaditya31/k8s-lab-infra.git"
         GITOPS_PATH = "applications/demo-apps04"
-        DOCKER_BUILDKIT = '0'
     }
 
     options {
