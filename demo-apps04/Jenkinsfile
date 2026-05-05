@@ -1,99 +1,107 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    APP_NAME = "demo-apps04"
-    IMAGE = "bobieaditya03/demo-apps04"
-    TAG = "v${BUILD_NUMBER}"
-    GITOPS_REPO = "https://github.com/bobieaditya31/k8s-lab-infra.git"
-    GITOPS_PATH = "applications/demo-apps04"
-    APP_DIR = "app"
-    DOCKER_BUILDKIT = '0'
-  }
-
-  options {
-    buildDiscarder(logRotator(numToKeepStr: '5'))
-    timeout(time: 30, unit: 'MINUTES')
-    disableConcurrentBuilds()
-  }
-
-  stages {
-
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
+    environment {
+        APP_NAME = "demo-apps04"
+        IMAGE = "bobieaditya03/demo-apps04"
+        TAG = "${GIT_COMMIT.take(7)}"
+        GITOPS_REPO = "https://github.com/bobieaditya31/k8s-lab-infra.git"
+        GITOPS_PATH = "applications/demo-apps04"
+        DOCKER_BUILDKIT = '0'
     }
 
-    stage('Build Image') {
-      steps {
-       dir("${APP_NAME}") { 
-        sh "docker build --no-cache -t ${IMAGE}:${TAG} -f Dockerfile ."
-        sh "docker tag ${IMAGE}:${TAG} ${IMAGE}:latest"
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+        timeout(time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
         }
-      }
-    }
 
-    stage('Push Image') {
-      steps {
-        withCredentials([usernamePassword(
-          credentialsId: 'dockerhub-credentials',
-          usernameVariable: 'USER',
-          passwordVariable: 'PASS'
-        )]) {
-          sh """
-          echo $PASS | docker login -u $USER --password-stdin
-          docker push ${IMAGE}:${TAG}
-          docker push ${IMAGE}:latest
-          """
+        stage('Build Image') {
+            steps {
+                dir("${APP_NAME}") {
+                    sh '''
+                        docker build --no-cache -t ${IMAGE}:${TAG} -f Dockerfile .
+                        docker tag ${IMAGE}:${TAG} ${IMAGE}:latest
+                    '''
+                }
+            }
         }
-      }
-    }
 
-    stage('Update GitOps Repo') {
-      steps {
-        withCredentials([usernamePassword(
-          credentialsId: 'github-credentials',
-          usernameVariable: 'GIT_USER',
-          passwordVariable: 'GIT_PASS'
-        )]) {
-          sh """
-          rm -rf gitops
-          git clone https://${GIT_USER}:${GIT_PASS}@github.com/bobieaditya31/k8s-lab-infra.git gitops
-
-          cd gitops/${GITOPS_PATH}
-
-          sed -i 's/tag:.*/tag: "${TAG}"/' values.yaml
-          sed -i 's|repository:.*|repository: ${IMAGE}|' values.yaml
-
-          git config user.email "jenkins@local"
-          git config user.name "jenkins"
-
-          git add .
-          git commit -m "🚀 ${APP_NAME}: update to ${TAG}" || echo "no changes"
-          git push
-          """
+        stage('Push Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ${IMAGE}:${TAG}
+                        docker push ${IMAGE}:latest
+                        docker logout
+                    '''
+                }
+            }
         }
-      }
+
+        stage('Update GitOps Repo') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'github-credentials',
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_PASS'
+                )]) {
+                    sh '''
+                        rm -rf gitops
+
+                        git clone https://$GIT_USER:$GIT_PASS@github.com/bobieaditya31/k8s-lab-infra.git gitops
+
+                        cd gitops/${GITOPS_PATH}
+
+                        sed -i 's/tag:.*/tag: "'"${TAG}"'"/' values.yaml
+                        sed -i 's|repository:.*|repository: '"${IMAGE}"'|' values.yaml
+
+                        git config user.email "jenkins@local"
+                        git config user.name "jenkins"
+
+                        git add .
+
+                        git commit -m "deploy: ${APP_NAME} -> ${TAG}" || echo "No changes to commit"
+
+                        git push origin main
+                    '''
+                }
+            }
+        }
+
+        stage('Cleanup Build') {
+            steps {
+                sh '''
+                    docker rm $(docker ps -aq -f ancestor=${IMAGE}:${TAG}) 2>/dev/null || true
+                    docker rmi ${IMAGE}:${TAG} 2>/dev/null || true
+                    docker system prune -f
+                '''
+            }
+        }
     }
 
-    stage('Cleanup Build') {
-      steps {
-        sh """
-        docker rm \$(docker ps -aq -f ancestor=${IMAGE}:${TAG}) 2>/dev/null || true
-        docker rmi ${IMAGE}:${TAG} 2>/dev/null || true
-        docker system prune -f
-        """
-      }
+    post {
+        success {
+            echo "✅ ${APP_NAME}: deployed successfully (${IMAGE}:${TAG})"
+        }
+        failure {
+            echo "❌ ${APP_NAME}: pipeline failed"
+        }
+        always {
+            cleanWs()
+        }
     }
-  }
-
-  post {
-    success {
-      echo "✅ ${APP_NAME}: Deployed! Image: ${IMAGE}:${TAG}"
-    }
-    failure {
-      echo "❌ ${APP_NAME}: Build failed"
-    }
-  }
 }
