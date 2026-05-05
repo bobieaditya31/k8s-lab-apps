@@ -1,7 +1,7 @@
 const rooms = [
-  { id: 1, name: "Deluxe Suite", price: 200, img: "https://via.placeholder.com/200x150" },
-  { id: 2, name: "Standard Room", price: 120, img: "https://via.placeholder.com/200x150" },
-  { id: 3, name: "Family Suite", price: 250, img: "https://via.placeholder.com/200x150" },
+  { id: 1, name: "Deluxe Suite", price: 2800000, img: "https://via.placeholder.com/200x150" },
+  { id: 2, name: "Standard Room", price: 1680000, img: "https://via.placeholder.com/200x150" },
+  { id: 3, name: "Family Suite", price: 3500000, img: "https://via.placeholder.com/200x150" },
 ];
 
 function renderRooms() {
@@ -11,8 +11,8 @@ function renderRooms() {
     card.className = 'room-card';
     card.innerHTML = `
       <img src="${room.img}" alt="${room.name}" style="width:100%;height:auto;"/>
-      <h3>${room.name}</h3>
-      <p>Price: $${room.price}/night</p>
+      <h3>IDR ${room.name}</h3>
+      <p>Price: IDR ${room.price}/night</p>
     `;
     list.appendChild(card);
   });
@@ -21,7 +21,7 @@ function renderRooms() {
   rooms.forEach(room => {
     const opt = document.createElement('option');
     opt.value = room.id;
-    opt.textContent = `${room.name} ($${room.price})`;
+    opt.textContent = `${room.name} (IDR ${room.price})`;
     select.appendChild(opt);
   });
 }
