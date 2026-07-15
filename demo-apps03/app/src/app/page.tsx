@@ -30,7 +30,7 @@ export default function BocilCoffeShop() {
     { name: 'Spaghetti Bolognese', price: 'Rp 35.000', description: 'Spaghetti dengan saus bolognese authentic' },
     { name: 'Rice Bowl Chicken Salted Egg', price: 'Rp 32.000', description: 'Nasi dengan ayam saus telur asin' },
     { name: 'Red Velvet Cake', price: 'Rp 28.000', description: 'Cake lembut dengan cream cheese' },
-    { name: 'Lychee Yakult', price: 'Rp 22.000', description: 'Minuman segar dengan lychee dan yakult' },
+    { name: 'Lychee Yakult', price: 'Rp 32.000', description: 'Minuman segar dengan lychee dan yakult' },
   ];
 
   const galleryImages = [
