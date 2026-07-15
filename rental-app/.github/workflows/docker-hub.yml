@@ -1,0 +1,39 @@
+name: Build and Push to Docker Hub
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-push-dockerhub:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/vehicle-rental-app:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/vehicle-rental-app:${{ github.ref_name }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/vehicle-rental-app:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.description=Vehicle Rental System - CodeIgniter 4 + PostgreSQL
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
