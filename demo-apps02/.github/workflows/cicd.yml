@@ -1,0 +1,77 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  APP_NAME: demo-apps02
+  IMAGE_NAME: restaurant-frontend
+  GITOPS_REPO: bobieaditya31/k8s-lab-infra
+  GITOPS_PATH: applications/demo-apps02
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Generate Tag
+        run: |
+          echo "TAG=v${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+
+      - name: Login GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+          | docker login ghcr.io \
+          -u ${{ github.actor }} \
+          --password-stdin
+
+      - name: Build Image
+        run: |
+          docker build \
+            -t ghcr.io/${{ github.repository_owner }}/${IMAGE_NAME}:${TAG} \
+            -t ghcr.io/${{ github.repository_owner }}/${IMAGE_NAME}:latest \
+            .
+
+      - name: Push Image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/${IMAGE_NAME}:${TAG}
+          docker push ghcr.io/${{ github.repository_owner }}/${IMAGE_NAME}:latest
+
+      - name: Checkout GitOps Repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GITOPS_REPO }}
+          token: ${{ secrets.GITOPS_TOKEN }}
+          path: gitops
+
+      - name: Update values.yaml
+        run: |
+          cd gitops/${GITOPS_PATH}
+
+          sed -i "s|repository:.*|repository: ghcr.io/${{ github.repository_owner }}/${IMAGE_NAME}|" values.yaml
+          sed -i "s|tag:.*|tag: ${TAG}|" values.yaml
+
+      - name: Commit Changes
+        run: |
+          cd gitops
+
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add .
+
+          git diff --cached --quiet || \
+          git commit -m "🚀 ${APP_NAME}: update image ${TAG}"
+
+          git push
